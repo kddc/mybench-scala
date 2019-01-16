@@ -1,0 +1,82 @@
+package de.kddc.mybench
+
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.model.{ HttpEntity, HttpResponse }
+import akka.stream.{ ActorMaterializer, ThrottleMode }
+import akka.stream.scaladsl.{ Keep, Sink, Source }
+
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.duration._
+import scala.util.{ Failure, Success }
+
+case class Bench(id: Long, longitude: Double, latitude: Double)
+
+object Application {
+  def main(args: Array[String]): Unit = {
+    implicit val actorSystem = ActorSystem("mybench")
+    implicit val exectorExecution = ExecutionContext.Implicits.global
+    implicit val materializer = ActorMaterializer()
+    implicit val database = new DatabaseDriver("fake")
+    val benchRepository = new BenchRepository()
+
+    val route = get {
+      complete("OK")
+    }
+
+    Http().bindAndHandleAsync(req => {
+      Future.successful(HttpResponse(entity = HttpEntity("asdasd")))
+    }, "127.0.0.1", 8080).onComplete {
+      case Success(binding) =>
+        println(s"Successfully bound to ${binding.localAddress}")
+      case Failure(error) =>
+        println(s"Binding failed\n$error")
+        System.exit(1)
+    }
+  }
+}
+
+class DatabaseDriver(connectionUri: String)
+
+class BenchRepository(implicit db: DatabaseDriver) {
+  def all: Source[Bench, NotUsed] = {
+    val benches = (1 to 10).map(i => Bench(i, Math.random() * 90, Math.random() * 90))
+    Source(benches).throttle(1, 100.millis, 1, ThrottleMode.shaping)
+  }
+
+  def findById(id: Long): Future[Option[Bench]] = {
+    if (id < 100) {
+      val bench = Bench(id, Math.random() * 90, Math.random() * 90)
+      Future.successful(Some(bench))
+    } else Future.successful(None)
+  }
+}
+
+/*
+    implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+    implicit val db = new DatabaseDriver()
+    val benches = BenchRepository.all
+    val b3 = BenchRepository.findById("3")
+
+    (1 to 16).map { i =>
+      Future {
+        println(s"$i: Starting")
+        val a = 1
+        val b = 2
+        Thread.sleep(1000)
+        val c = 1 + 2
+        println(s"$i: Finished")
+        c
+      }
+    }
+
+    benchRepository.findById("123").map { possibleABench =>
+      if (possibleABench.isDefined) {
+        println(possibleABench)
+      } else {
+        println("NOT FOUND")
+      }
+    }
+ */
