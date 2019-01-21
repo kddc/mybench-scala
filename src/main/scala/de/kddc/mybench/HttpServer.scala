@@ -8,10 +8,16 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink}
 import de.kddc.mybench.repositories.BenchRepository
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+object HttpServerJsonProtocol extends DefaultJsonProtocol {
+  implicit val BenchJsonFormat: RootJsonFormat[Bench] = jsonFormat3(Bench)
+}
+
 class HttpServer(benchRepository: BenchRepository)(implicit executionContext: ExecutionContext, materializer: ActorMaterializer) extends SprayJsonSupport {
+
   import HttpServerJsonProtocol._
 
   def listBenchesRoute = pathEnd {

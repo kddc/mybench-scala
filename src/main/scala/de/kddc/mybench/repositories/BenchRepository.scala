@@ -16,7 +16,7 @@ class BenchRepository(implicit db: DatabaseDriver) {
         i
       }
       .map(i => Bench(i, Math.random() * 90, Math.random() * 90))
-      .throttle(1, 1000.millis, 1, ThrottleMode.shaping)
+      .throttle(1, 500.millis, 1, ThrottleMode.shaping)
   }
 
   def findById(id: Long): Future[Option[Bench]] = {
@@ -28,5 +28,7 @@ class BenchRepository(implicit db: DatabaseDriver) {
 }
 
 object BenchRepository {
+
   final case class Bench(id: Long, longitude: Double, latitude: Double)
+
 }
