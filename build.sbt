@@ -9,8 +9,9 @@ name         := "mybench"
 libraryDependencies ++= Seq(
   // akka
   "com.typesafe.akka"           %% "akka-http"                % akkaHttpVersion,
-  "com.typesafe.akka"           %% "akka-http-spray-json"     % akkaHttpVersion,
+//  "com.typesafe.akka"           %% "akka-http-spray-json"     % akkaHttpVersion,
   "com.typesafe.akka"           %% "akka-stream"              % akkaVersion,
+  "de.heikoseeberger"           %% "akka-http-play-json"      % "1.22.0",
   // test
   "com.typesafe.akka"           %% "akka-http-testkit"        % akkaHttpVersion % Test,
   "com.typesafe.akka"           %% "akka-testkit"             % akkaVersion     % Test,
