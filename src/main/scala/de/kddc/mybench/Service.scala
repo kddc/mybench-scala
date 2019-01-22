@@ -1,7 +1,7 @@
 package de.kddc.mybench
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import com.typesafe.scalalogging.LazyLogging
 import de.kddc.mybench.repositories.BenchRepository
 
 import scala.util.{Failure, Success}
@@ -15,7 +15,8 @@ trait ServiceComponents {
 class Service
   extends ServiceComponents
     with DefaultServiceComponents
-    with DefaultMongoDbComponents {
+    with DefaultMongoDbComponents
+    with LazyLogging {
 
   val interface = config.getString("http.interface")
   val port = config.getInt("http.port")
@@ -23,9 +24,9 @@ class Service
   def start() = {
     Http().bindAndHandle(httpServer.routes, interface, port).onComplete {
       case Success(binding) =>
-        println(s"Successfully bound to ${binding.localAddress}")
+        logger.info(s"Successfully bound to ${binding.localAddress}")
       case Failure(error) =>
-        println(s"Binding failed\n$error")
+        logger.error("Binding failed", error)
         System.exit(1)
     }
   }
