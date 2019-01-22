@@ -2,14 +2,17 @@ package de.kddc.mybench
 
 import akka.http.scaladsl.Http
 import com.typesafe.scalalogging.LazyLogging
+import de.kddc.mybench.http.{BenchRoutes, HttpServer}
 import de.kddc.mybench.repositories.BenchRepository
 
 import scala.util.{Failure, Success}
 
 trait ServiceComponents {
   this: ServiceComponentsBase with MongoDbComponentsBase =>
-  lazy val benchRepository = new BenchRepository()
-  lazy val httpServer = new HttpServer(benchRepository)
+  lazy val benchRepository = new BenchRepository(mongoDb)
+  lazy val benchRoutes = new BenchRoutes(benchRepository)
+
+  lazy val httpServer = new HttpServer(benchRoutes)
 }
 
 class Service

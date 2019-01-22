@@ -1,24 +1,26 @@
-package de.kddc.mybench
+package de.kddc.mybench.http
 
 import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.ws.TextMessage
-import akka.http.scaladsl.server.Directive1
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink}
 import de.kddc.mybench.repositories.BenchRepository
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext}
 
-object HttpServerJsonProtocol extends DefaultJsonProtocol {
-  implicit val BenchJsonFormat: RootJsonFormat[Bench] = jsonFormat3(Bench)
-}
+class BenchRoutes(benchRepository: BenchRepository)(implicit executionContext: ExecutionContext, materializer: ActorMaterializer)
+  extends HttpRoutes
+    with HttpProtocol {
 
-class HttpServer(benchRepository: BenchRepository)(implicit executionContext: ExecutionContext, materializer: ActorMaterializer) extends SprayJsonSupport {
-
-  import HttpServerJsonProtocol._
+  def routes = pathPrefix("benches")(
+    concat(
+      listBenchesRoute,
+      listBenchesRouteStreaming,
+      listBenchesRouteWebsocket,
+      retrieveBenchRoute
+    )
+  )
 
   def listBenchesRoute = pathEnd {
     get {
@@ -62,15 +64,6 @@ class HttpServer(benchRepository: BenchRepository)(implicit executionContext: Ex
         case Some(bench) => complete(bench.toString)
         case None => reject
       }
-    }
-  }
-
-  def routes = pathPrefix("benches")(concat(listBenchesRoute, listBenchesRouteStreaming, listBenchesRouteWebsocket, retrieveBenchRoute))
-
-  def onSuccessAndDefined[T](res: Future[Option[T]]): Directive1[T] = {
-    onSuccess(res).flatMap {
-      case Some(value) => provide(value)
-      case None => reject
     }
   }
 }

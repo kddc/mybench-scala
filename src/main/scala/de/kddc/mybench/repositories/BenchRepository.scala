@@ -3,12 +3,13 @@ package de.kddc.mybench.repositories
 import akka.NotUsed
 import akka.stream.ThrottleMode
 import akka.stream.scaladsl.Source
-import de.kddc.mybench.{Bench, DatabaseDriver}
+import reactivemongo.api.DefaultDB
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class BenchRepository(implicit db: DatabaseDriver) {
+class BenchRepository(db: DefaultDB) {
+  import BenchRepository._
   def all: Source[Bench, NotUsed] = {
     Source(1 to 10)
       .map { i =>
