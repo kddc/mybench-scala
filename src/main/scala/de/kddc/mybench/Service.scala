@@ -12,7 +12,7 @@ trait ServiceComponents {
   lazy val httpServer = new HttpServer(benchRepository)
 }
 
-class Service(implicit val actorSystem: ActorSystem)
+class Service
   extends ServiceComponents
     with DefaultServiceComponents
     with DefaultMongoDbComponents {

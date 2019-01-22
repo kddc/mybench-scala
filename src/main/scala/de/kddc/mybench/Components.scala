@@ -16,6 +16,7 @@ trait ServiceComponentsBase {
 }
 
 trait DefaultServiceComponents extends ServiceComponentsBase {
+  implicit lazy val actorSystem = ActorSystem("mybench")
   implicit lazy val executionContext: ExecutionContext = ExecutionContext.Implicits.global
   implicit lazy val materializer: ActorMaterializer = ActorMaterializer()(actorSystem)
   lazy val config: Config = actorSystem.settings.config
