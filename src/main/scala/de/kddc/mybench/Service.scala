@@ -17,8 +17,11 @@ class Service(implicit val actorSystem: ActorSystem)
     with DefaultServiceComponents
     with DefaultMongoDbComponents {
 
+  val interface = config.getString("http.interface")
+  val port = config.getInt("http.port")
+
   def start() = {
-    Http().bindAndHandle(httpServer.routes, "127.0.0.1", 8080).onComplete {
+    Http().bindAndHandle(httpServer.routes, interface, port).onComplete {
       case Success(binding) =>
         println(s"Successfully bound to ${binding.localAddress}")
       case Failure(error) =>
