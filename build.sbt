@@ -9,7 +9,6 @@ name         := "mybench"
 libraryDependencies ++= Seq(
   // akka
   "com.typesafe.akka"           %% "akka-http"                % akkaHttpVersion,
-//  "com.typesafe.akka"           %% "akka-http-spray-json"     % akkaHttpVersion,
   "com.typesafe.akka"           %% "akka-stream"              % akkaVersion,
   "de.heikoseeberger"           %% "akka-http-play-json"      % "1.22.0",
   // test
@@ -26,3 +25,5 @@ libraryDependencies ++= Seq(
   "org.reactivemongo"          %% "reactivemongo"             % reactiveMongoVersion,
   "org.reactivemongo"          %% "reactivemongo-akkastream"  % reactiveMongoVersion,
 )
+
+scalacOptions += ""
