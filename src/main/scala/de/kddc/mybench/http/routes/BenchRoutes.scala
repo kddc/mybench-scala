@@ -75,29 +75,13 @@ class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStr
     get {
       parameters('lat.as[Double], 'long.as[Double]) {
         (lat, long) => {
-//          val nodes = openStreetMapClient.findNodes(BBox.fromLocation(lat, long))
-//          val benches = nodes
-//            .map(nodes => nodes.map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon))))
-//          val persistedBenches = benches
-//              .flatMap(benches => Future.sequence(benches.map(bench => benchRepository.create(bench))))
-
           val countF = openStreetMapClient.streamNodes(BBox.fromLocation(lat, long))
               .map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon)))
               .groupedWithin(16, 1.second)
               .mapAsync(1)(benchRepository.createMany)
               .flatMapConcat(chunks => Source(chunks.toList))
               .runFold(0L)((count, _) => count + 1)
-
           complete(countF.map(ImportResult.apply))
-
-//          val benchesF = openStreetMapClient.findNodes(BBox.fromLocation(lat, long))
-//            .map(nodes => nodes.map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon))))
-//            .map(benches => benches.map(bench => benchRepository.create(bench)))
-
-//          onSuccess(benchesF) { benches =>
-//            complete(benches)
-//          }
-//          benchesF.foreach(_.foreach(println))
         }
       }
     }
