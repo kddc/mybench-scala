@@ -11,6 +11,7 @@ import de.kddc.mybench.http.{HttpProtocol, HttpRoutes}
 import de.kddc.mybench.repositories.BenchRepository
 import de.kddc.mybench.repositories.BenchRepository.{Bench, Location}
 import de.kddc.mybench.utils.BBox
+import de.kddc.mybench.utils.MyExtendedSource._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -76,11 +77,9 @@ class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStr
       parameters('lat.as[Double], 'long.as[Double]) {
         (lat, long) => {
           val countF = openStreetMapClient.streamNodes(BBox.fromLocation(lat, long))
-              .map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon)))
-              .groupedWithin(16, 1.second)
-              .mapAsync(1)(benchRepository.createMany)
-              .flatMapConcat(chunks => Source(chunks.toList))
-              .runFold(0L)((count, _) => count + 1)
+            .map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon)))
+            .mapAsyncChunked(16, 1.second)(benchRepository.createMany)
+            .runFold(0L)((count, _) => count + 1)
           complete(countF.map(ImportResult.apply))
         }
       }
