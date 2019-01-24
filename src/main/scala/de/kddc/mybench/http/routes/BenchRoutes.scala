@@ -10,7 +10,7 @@ import de.kddc.mybench.clients.OpenStreetMapClient
 import de.kddc.mybench.http.{HttpProtocol, HttpRoutes}
 import de.kddc.mybench.repositories.BenchRepository
 import de.kddc.mybench.repositories.BenchRepository.{Bench, Location}
-import de.kddc.mybench.utils.BBox
+import de.kddc.mybench.utils.{BBox, BBoxLocation => UtilsLocation}
 import de.kddc.mybench.utils.MyExtendedSource._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -72,12 +72,29 @@ class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStr
     }
   }
 
-  def importBenchesRoute = path("import") {
+  def importBenchesSetRoute = path("import") {
     get {
       parameters('lat.as[Double], 'long.as[Double]) {
         (lat, long) => {
-          val countF = openStreetMapClient.streamNodes(BBox.fromLocation(lat, long))
+          val nodesF = openStreetMapClient.searchNodes(UtilsLocation(latitude = lat, longitude = long))
+          val benchesF = nodesF.map(_.map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon))))
+          val benchesP = benchesF.map(benches => Future.sequence(benches.map(bench => benchRepository.create(bench))))
+          val benchesPF = Future.sequence(benchesP)
+        }
+      }
+    }
+  }
+
+  def importBenchesRoute = path("import" / "stream") {
+    get {
+      parameters('lat.as[Double], 'long.as[Double]) {
+        (lat, long) => {
+          val countF = openStreetMapClient.streamAllNodes(UtilsLocation(latitude = lat, longitude = long))
             .map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon)))
+            .map { bench =>
+              println(bench)
+              bench
+            }
             .mapAsyncChunked(16, 1.second)(benchRepository.createMany)
             .runFold(0L)((count, _) => count + 1)
           complete(countF.map(ImportResult.apply))

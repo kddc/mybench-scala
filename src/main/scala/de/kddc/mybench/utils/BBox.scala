@@ -1,10 +1,10 @@
 package de.kddc.mybench.utils
 
-case class BBox(south: Double, west: Double, north: Double, east: Double) {
-  case class Location(latitude: Double, longitude: Double)
+case class BBoxLocation(latitude: Double, longitude: Double)
 
-  val center: Location = {
-    Location((south + north) / 2, (west + east) / 2)
+case class BBox(south: Double, west: Double, north: Double, east: Double) {
+  val center: BBoxLocation = {
+    BBoxLocation((south + north) / 2, (west + east) / 2)
   }
 
   def subdivide(n: Int): Seq[BBox] = {
@@ -14,14 +14,21 @@ case class BBox(south: Double, west: Double, north: Double, east: Double) {
       val subX = (east - west) / n
       val subY = (north - south) / n
       (0 until (n * n))
-        .map(i => cell(i))
+        .map(i => BBox.cell(i))
         .map(pos => {
-          Location(center.latitude + subY * pos._2, center.longitude + subX * pos._1)
+          BBoxLocation(center.latitude + subY * pos._2, center.longitude + subX * pos._1)
         })
         .map(c => {
           BBox(c.latitude - subY / 2, c.longitude - subX / 2, c.latitude + subY / 2, c.longitude + subX / 2)
         })
     }
+  }
+}
+
+object BBox {
+  def fromLocation(latitude: Double, longitude: Double, distance: Int = 1000) = {
+    val r: Double = distance * 0.0089982311916 / 1000
+    BBox(latitude - r, longitude - r, latitude + r, longitude + r)
   }
 
   def cell(n: Int): (Int, Int, Int) = {
@@ -39,12 +46,5 @@ case class BBox(south: Double, west: Double, north: Double, east: Double) {
         case _ => (0, 0, 0)
       }
     }
-  }
-}
-
-object BBox {
-  def fromLocation(latitude: Double, longitude: Double, distance: Int = 1000) = {
-    val r: Double = distance * 0.0089982311916 / 1000
-    BBox(latitude - r, longitude - r, latitude + r, longitude + r)
   }
 }
