@@ -1,7 +1,7 @@
-lazy val akkaHttpVersion = "10.1.7"
-lazy val akkaVersion     = "2.5.19"
+lazy val akkaHttpVersion      = "10.1.7"
+lazy val akkaVersion          = "2.5.19"
 lazy val reactiveMongoVersion = "0.13.0"
-lazy val sttpVersion = "1.5.8"
+lazy val sttpVersion          = "1.5.7"
 
 organization := "de.kddc"
 scalaVersion := "2.12.7"

@@ -4,7 +4,7 @@ import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSup
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Keep, Sink}
+import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.typesafe.scalalogging.LazyLogging
 import de.kddc.mybench.clients.OpenStreetMapClient
 import de.kddc.mybench.http.{HttpProtocol, HttpRoutes}
@@ -13,6 +13,7 @@ import de.kddc.mybench.repositories.BenchRepository.{Bench, Location}
 import de.kddc.mybench.utils.BBox
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 import scala.util.Success
 
 class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStreetMapClient)(implicit executionContext: ExecutionContext, materializer: ActorMaterializer)
@@ -74,11 +75,22 @@ class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStr
     get {
       parameters('lat.as[Double], 'long.as[Double]) {
         (lat, long) => {
-          val nodes = openStreetMapClient.findNodes(BBox.fromLocation(lat, long))
-          val benches = nodes
-            .map(nodes => nodes.map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon))))
-          val persistedBenches = benches
-              .flatMap(benches => Future.sequence(benches.map(bench => benchRepository.create(bench))))
+//          val nodes = openStreetMapClient.findNodes(BBox.fromLocation(lat, long))
+//          val benches = nodes
+//            .map(nodes => nodes.map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon))))
+//          val persistedBenches = benches
+//              .flatMap(benches => Future.sequence(benches.map(bench => benchRepository.create(bench))))
+
+          val countF = openStreetMapClient.streamNodes(BBox.fromLocation(lat, long))
+              .map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon)))
+              .groupedWithin(16, 1.second)
+              .mapAsync(1)(benchRepository.createMany)
+              .flatMapConcat(chunks => Source(chunks.toList))
+              .runFold(0L)((count, _) => count + 1)
+
+          onSuccess(countF) { count =>
+            complete(s"Imported $count benches")
+          }
 
 //          val benchesF = openStreetMapClient.findNodes(BBox.fromLocation(lat, long))
 //            .map(nodes => nodes.map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon))))

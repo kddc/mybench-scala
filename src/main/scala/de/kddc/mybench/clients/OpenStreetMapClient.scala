@@ -1,5 +1,7 @@
 package de.kddc.mybench.clients
 
+import akka.NotUsed
+import akka.stream.scaladsl.Source
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.playJson._
 import com.typesafe.scalalogging.LazyLogging
@@ -33,6 +35,10 @@ class OpenStreetMapClient(implicit ec: ExecutionContext, sttpBackend: SttpBacken
       .send()
       .map(parseResponse)
       .map(_.elements)
+  }
+
+  def streamNodes(bbox: BBox): Source[OpenStreetMapNode, NotUsed] = {
+    Source.fromFuture(findNodes(bbox)).flatMapConcat(nodes => Source(nodes.toList))
   }
 
   private def request(): RequestT[Empty, String, Nothing] = {

@@ -54,6 +54,10 @@ class BenchRepository(db: DefaultDB)(implicit ex: ExecutionContext, mat: ActorMa
   def create(bench: Bench): Future[Bench] = {
     collection.insert(bench).map(_ => bench)
   }
+
+  def createMany(benches: Seq[Bench]): Future[Seq[Bench]] = {
+    collection.insert[Bench](false).many(benches).map(_ => benches)
+  }
 }
 
 object BenchRepository extends LazyLogging {

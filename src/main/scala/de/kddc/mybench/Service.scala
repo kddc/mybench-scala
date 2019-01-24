@@ -31,13 +31,10 @@ class Service
   val interface = config.getString("http.interface")
   val port = config.getInt("http.port")
 
-
-
   def start() = {
     Http().bindAndHandle(httpServer.routes, interface, port).onComplete {
       case Success(binding) =>
         logger.info(s"Successfully bound to ${binding.localAddress}")
-        openStreetMapClient.findNodes(BBox(53.91798871241739,9.499955177307129,53.94972163975539,9.56033706665039)).map(_.foreach(println))
       case Failure(error) =>
         logger.error("Binding failed", error)
         System.exit(1)
