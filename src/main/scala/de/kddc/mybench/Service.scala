@@ -7,7 +7,6 @@ import de.kddc.mybench.components._
 import de.kddc.mybench.http.HttpServer
 import de.kddc.mybench.http.routes.BenchRoutes
 import de.kddc.mybench.repositories.BenchRepository
-import de.kddc.mybench.utils.BBox
 
 import scala.util.{Failure, Success}
 

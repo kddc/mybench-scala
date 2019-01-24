@@ -3,8 +3,7 @@ package de.kddc.mybench
 import akka.actor.ActorSystem
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
-import com.softwaremill.sttp.testing.SttpBackendStub
-import de.kddc.mybench.components.{DefaultMongoDbComponents, HttpClientComponentsBase, ServiceComponentsBase}
+import de.kddc.mybench.components.{HttpClientComponentsBase, ServiceComponentsBase}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{Matchers, WordSpec}
@@ -16,7 +15,7 @@ abstract class ServiceTest
     with ScalatestRouteTest
     with ServiceComponentsBase
     with HttpClientComponentsBase
-    with DefaultMongoDbComponents
+    with TestMongoDbComponents
     with Matchers
     with ScalaFutures
     with Eventually {

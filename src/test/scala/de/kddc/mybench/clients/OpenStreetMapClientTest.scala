@@ -5,7 +5,7 @@ import de.kddc.mybench.utils.BBox
 import de.kddc.mybench.{ServiceComponents, ServiceTest}
 
 class OpenStreetMapClientTest extends ServiceTest with ServiceComponents {
-  "works" in {
+  "should fetch nodes" in {
     val bbox = BBox(53.91798871241739,9.499955177307129,53.94972163975539,9.56033706665039)
     val benches = openStreetMapClient.findNodes(bbox).futureValue
     benches should not be empty

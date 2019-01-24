@@ -88,9 +88,7 @@ class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStr
               .flatMapConcat(chunks => Source(chunks.toList))
               .runFold(0L)((count, _) => count + 1)
 
-          onSuccess(countF) { count =>
-            complete(s"Imported $count benches")
-          }
+          complete(countF.map(ImportResult.apply))
 
 //          val benchesF = openStreetMapClient.findNodes(BBox.fromLocation(lat, long))
 //            .map(nodes => nodes.map(node => Bench(name = node.id.toString, location = Location(node.lat, node.lon))))
@@ -100,7 +98,6 @@ class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStr
 //            complete(benches)
 //          }
 //          benchesF.foreach(_.foreach(println))
-          complete(StatusCodes.OK)
         }
       }
     }
