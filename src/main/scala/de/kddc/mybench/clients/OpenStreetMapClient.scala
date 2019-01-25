@@ -42,6 +42,10 @@ class OpenStreetMapClient(implicit ec: ExecutionContext, sttpBackend: SttpBacken
       .map(_.elements)
   }
 
+  def streamNodes(location: BBoxLocation): Source[OpenStreetMapNode, NotUsed] = {
+    streamNodes(BBox.fromLocation(location.latitude, location.longitude))
+  }
+
   def streamNodes(bbox: BBox): Source[OpenStreetMapNode, NotUsed] = {
     RestartSource.onFailuresWithBackoff(1.second, 1.minute, 0.2, 10) { () =>
       Source.fromFuture(searchNodes(bbox)).flatMapConcat(nodes => Source(nodes.toList))
