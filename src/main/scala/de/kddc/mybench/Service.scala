@@ -5,19 +5,30 @@ import com.typesafe.scalalogging.LazyLogging
 import de.kddc.mybench.clients.OpenStreetMapClient
 import de.kddc.mybench.components._
 import de.kddc.mybench.http.HttpServer
-import de.kddc.mybench.http.routes.BenchRoutes
-import de.kddc.mybench.repositories.BenchRepository
+import de.kddc.mybench.http.routes.{AuthRoutes, BenchRoutes, UserRoutes}
+import de.kddc.mybench.providers.AuthProvider
+import de.kddc.mybench.repositories.{BenchRepository, UserRepository}
 
 import scala.util.{Failure, Success}
 
 trait ServiceComponents {
   this: ServiceComponentsBase with MongoDbComponentsBase with HttpClientComponentsBase =>
-  lazy val openStreetMapClient = new OpenStreetMapClient()
+  lazy val userRepository = new UserRepository(mongoDb)
   lazy val benchRepository = new BenchRepository(mongoDb)
 
+  lazy val openStreetMapClient = new OpenStreetMapClient()
+
+  implicit val authProvider = new AuthProvider(userRepository)
+
+  lazy val authRoutes = new AuthRoutes()
+  lazy val userRoutes = new UserRoutes(userRepository)
   lazy val benchRoutes = new BenchRoutes(benchRepository, openStreetMapClient)
 
-  lazy val httpServer = new HttpServer(benchRoutes)
+  lazy val httpServer = new HttpServer(
+    authRoutes = authRoutes,
+    userRoutes = userRoutes,
+    benchRoutes = benchRoutes
+  )
 }
 
 class Service

@@ -9,7 +9,7 @@ class BenchRoutesTest extends ServiceTest with ServiceComponents with HttpProtoc
   val routes = httpServer.routes
 
   "should import benches" in {
-    Get("/benches/import?lat=53.9330084&long=9.5539501") ~> Route.seal(routes) ~> check {
+    Get("/benches/import/stream/chunk?lat=53.9330084&long=9.5539501") ~> routes ~> check {
       status should be(StatusCodes.OK)
       val result = responseAs[ImportResult]
       result.count should be(2)

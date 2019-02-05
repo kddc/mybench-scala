@@ -8,6 +8,7 @@ import akka.stream.scaladsl.{Keep, Sink}
 import com.typesafe.scalalogging.LazyLogging
 import de.kddc.mybench.clients.OpenStreetMapClient
 import de.kddc.mybench.http.{HttpProtocol, HttpRoutes}
+import de.kddc.mybench.providers.AuthProvider
 import de.kddc.mybench.repositories.BenchRepository
 import de.kddc.mybench.repositories.BenchRepository.{Bench, Location}
 import de.kddc.mybench.utils.{BBoxLocation => UtilsLocation}
@@ -16,7 +17,7 @@ import de.kddc.mybench.utils.MyExtendedSource._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
-class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStreetMapClient)(implicit executionContext: ExecutionContext, materializer: ActorMaterializer)
+class BenchRoutes(benchRepository: BenchRepository, openStreetMapClient: OpenStreetMapClient)(implicit executionContext: ExecutionContext, materializer: ActorMaterializer, authProvider: AuthProvider)
   extends HttpRoutes
   with HttpProtocol
   with LazyLogging {

@@ -1,6 +1,6 @@
 package de.kddc.mybench
 
-import de.kddc.mybench.utils.BBox
+import de.kddc.mybench.utils.BoundingBox
 
 object Application {
   def main(args: Array[String]): Unit = {

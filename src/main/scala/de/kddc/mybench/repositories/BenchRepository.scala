@@ -61,7 +61,7 @@ class BenchRepository(db: DefaultDB)(implicit ex: ExecutionContext, mat: ActorMa
 }
 
 object BenchRepository extends LazyLogging {
-  final case class Bench(id: UUID = UUID.randomUUID, name: String, location: Location)
+  final case class Bench(_id: UUID = UUID.randomUUID, name: String, location: Location)
   final case class Location(longitude: Double, latitude: Double)
 
   private def init(db: DefaultDB)(implicit ec: ExecutionContext): Future[BSONCollection] = {

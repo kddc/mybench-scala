@@ -29,6 +29,10 @@ libraryDependencies ++= Seq(
   // mongo
   "org.reactivemongo"           %% "reactivemongo"            % reactiveMongoVersion,
   "org.reactivemongo"           %% "reactivemongo-akkastream" % reactiveMongoVersion,
+  // other
+  "com.github.t3hnar"           %% "scala-bcrypt"             % "3.1",
+  "com.pauldijou"               %% "jwt-core"                 % "1.1.0",
+  "com.pauldijou"               %% "jwt-play-json"            % "1.1.0"
 )
 
 scalacOptions += ""

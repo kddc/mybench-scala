@@ -1,12 +1,18 @@
 package de.kddc.mybench.http
 
-import akka.http.scaladsl.server.{ Directive1, MalformedQueryParamRejection, Route }
+import akka.http.scaladsl.server.{Directive1, MalformedQueryParamRejection, Route}
 import akka.http.scaladsl.server.Directives._
+import de.kddc.mybench.providers.AuthProvider
+import de.kddc.mybench.repositories.UserRepository.User
 
 import scala.concurrent.Future
 
-trait HttpRoutes { this: HttpProtocol =>
+abstract class HttpRoutes(implicit authProvider: AuthProvider) extends HttpProtocol {
   def routes: Route
+
+  def withAuthorization: Directive1[User] = {
+    authProvider.extractUser
+  }
 
   def onSuccessAndDefined[T](res: Future[Option[T]]): Directive1[T] = {
     onSuccess(res).flatMap {

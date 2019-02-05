@@ -2,33 +2,33 @@ package de.kddc.mybench.utils
 
 case class BBoxLocation(latitude: Double, longitude: Double)
 
-case class BBox(south: Double, west: Double, north: Double, east: Double) {
+case class BoundingBox(south: Double, west: Double, north: Double, east: Double) {
   val center: BBoxLocation = {
     BBoxLocation((south + north) / 2, (west + east) / 2)
   }
 
-  def subdivide(n: Int): Seq[BBox] = {
+  def subdivide(n: Int): Seq[BoundingBox] = {
     if (n % 2 == 0)
       throw new IllegalArgumentException("must be an odd number")
     else {
       val subX = (east - west) / n
       val subY = (north - south) / n
       (0 until (n * n))
-        .map(i => BBox.cell(i))
+        .map(i => BoundingBox.cell(i))
         .map(pos => {
           BBoxLocation(center.latitude + subY * pos._2, center.longitude + subX * pos._1)
         })
         .map(c => {
-          BBox(c.latitude - subY / 2, c.longitude - subX / 2, c.latitude + subY / 2, c.longitude + subX / 2)
+          BoundingBox(c.latitude - subY / 2, c.longitude - subX / 2, c.latitude + subY / 2, c.longitude + subX / 2)
         })
     }
   }
 }
 
-object BBox {
+object BoundingBox {
   def fromLocation(latitude: Double, longitude: Double, distance: Int = 1000) = {
     val r: Double = distance * 0.0089982311916 / 1000
-    BBox(latitude - r, longitude - r, latitude + r, longitude + r)
+    BoundingBox(latitude - r, longitude - r, latitude + r, longitude + r)
   }
 
   def cell(n: Int): (Int, Int, Int) = {

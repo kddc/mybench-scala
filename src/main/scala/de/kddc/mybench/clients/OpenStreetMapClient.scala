@@ -6,7 +6,7 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.playJson._
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-import de.kddc.mybench.utils.{BBox, BBoxLocation, SnakeSource}
+import de.kddc.mybench.utils.{BoundingBox, BBoxLocation, SnakeSource}
 import play.api.libs.json._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,10 +25,10 @@ class OpenStreetMapClient(implicit ec: ExecutionContext, sttpBackend: SttpBacken
   import OpenStreetMapClient._
 
   def searchNodes(location: BBoxLocation): Future[Seq[OpenStreetMapNode]] = {
-    searchNodes(BBox.fromLocation(location.latitude, location.longitude))
+    searchNodes(BoundingBox.fromLocation(location.latitude, location.longitude))
   }
 
-  def searchNodes(bbox: BBox): Future[Seq[OpenStreetMapNode]] = {
+  def searchNodes(bbox: BoundingBox): Future[Seq[OpenStreetMapNode]] = {
     val query = s"""[out:json][timeout:25];\n(\nnode[\"amenity\"=\"bench\"](${bbox.south},${bbox.west},${bbox.north},${bbox.east});\n);\nout body;"""
     val body: Map[String, String] = Map(
       "data" -> query
@@ -43,10 +43,10 @@ class OpenStreetMapClient(implicit ec: ExecutionContext, sttpBackend: SttpBacken
   }
 
   def streamNodes(location: BBoxLocation): Source[OpenStreetMapNode, NotUsed] = {
-    streamNodes(BBox.fromLocation(location.latitude, location.longitude))
+    streamNodes(BoundingBox.fromLocation(location.latitude, location.longitude))
   }
 
-  def streamNodes(bbox: BBox): Source[OpenStreetMapNode, NotUsed] = {
+  def streamNodes(bbox: BoundingBox): Source[OpenStreetMapNode, NotUsed] = {
     RestartSource.onFailuresWithBackoff(1.second, 1.minute, 0.2, 10) { () =>
       Source.fromFuture(searchNodes(bbox)).flatMapConcat(nodes => Source(nodes.toList))
     }
@@ -56,7 +56,7 @@ class OpenStreetMapClient(implicit ec: ExecutionContext, sttpBackend: SttpBacken
     val length = 0.05
     SnakeSource()
       .map { case (x, y) =>
-        BBox(
+        BoundingBox(
           north = center.latitude + (0.5 + y) * length,
           south = center.latitude + (-0.5 + y) * length,
           west = center.longitude + (-0.5 + x) * length,
