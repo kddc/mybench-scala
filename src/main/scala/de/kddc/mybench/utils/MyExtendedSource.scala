@@ -4,7 +4,7 @@ import akka.stream.scaladsl.Source
 
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
-
+import scala.language.implicitConversions
 
 class MyExtendedSource[T, M](val inner: Source[T, M]) extends AnyVal {
   def mapAsyncChunked(n: Int, d: FiniteDuration)(fn: Seq[T] => Future[Seq[T]]): Source[T, M] = {

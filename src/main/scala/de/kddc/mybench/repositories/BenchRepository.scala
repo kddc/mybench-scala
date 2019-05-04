@@ -2,19 +2,19 @@ package de.kddc.mybench.repositories
 
 import java.util.UUID
 
-import akka.{Done, NotUsed}
-import akka.stream.{ActorMaterializer, ThrottleMode}
-import akka.stream.scaladsl.{Sink, Source}
+import akka.{ Done, NotUsed }
+import akka.stream.{ ActorMaterializer, ThrottleMode }
+import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.scalalogging.LazyLogging
 import de.kddc.mybench.utils.BaseBSONProtocol
-import reactivemongo.api.{Cursor, DefaultDB}
+import reactivemongo.api.{ Cursor, DefaultDB }
 import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSONDocument, BSONDocumentHandler, Macros}
+import reactivemongo.bson.{ BSONDocument, BSONDocumentHandler, Macros }
 import reactivemongo.akkastream._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ Await, ExecutionContext, Future }
 import scala.concurrent.duration._
-import scala.util.{Random, Success}
+import scala.util.{ Random, Success }
 
 class BenchRepository(db: DefaultDB)(implicit ex: ExecutionContext, mat: ActorMaterializer) {
   import BenchRepository.BSONProtocol._
@@ -27,8 +27,8 @@ class BenchRepository(db: DefaultDB)(implicit ex: ExecutionContext, mat: ActorMa
       .find(BSONDocument.empty)
       .cursor[Bench]()
       .documentSource()
-      //.throttle(1, 50.millis, 1, ThrottleMode.shaping)
-      //.mapMaterializedValue(_ => NotUsed)
+    //.throttle(1, 50.millis, 1, ThrottleMode.shaping)
+    //.mapMaterializedValue(_ => NotUsed)
   }
 
   def all(from: Int = 0, limit: Int = 10): Future[(Seq[Bench], Long)] = {

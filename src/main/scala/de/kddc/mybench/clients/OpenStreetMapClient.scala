@@ -1,15 +1,15 @@
 package de.kddc.mybench.clients
 
 import akka.NotUsed
-import akka.stream.scaladsl.{RestartSource, Source}
+import akka.stream.scaladsl.{ RestartSource, Source }
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.playJson._
 import com.typesafe.scalalogging.LazyLogging
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-import de.kddc.mybench.utils.{BoundingBox, BBoxLocation, SnakeSource}
+import de.kddc.mybench.utils.{ BoundingBox, BBoxLocation, SnakeSource }
 import play.api.libs.json._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 
 object OpenStreetMapClientProtocol extends PlayJsonSupport {
@@ -31,8 +31,7 @@ class OpenStreetMapClient(implicit ec: ExecutionContext, sttpBackend: SttpBacken
   def searchNodes(bbox: BoundingBox): Future[Seq[OpenStreetMapNode]] = {
     val query = s"""[out:json][timeout:25];\n(\nnode[\"amenity\"=\"bench\"](${bbox.south},${bbox.west},${bbox.north},${bbox.east});\n);\nout body;"""
     val body: Map[String, String] = Map(
-      "data" -> query
-    )
+      "data" -> query)
     request()
       .post(uri"https://overpass-api.de/api/interpreter")
       .body(body)
@@ -55,20 +54,20 @@ class OpenStreetMapClient(implicit ec: ExecutionContext, sttpBackend: SttpBacken
   def streamAllNodes(center: BBoxLocation): Source[OpenStreetMapNode, NotUsed] = {
     val length = 0.05
     SnakeSource()
-      .map { case (x, y) =>
-        BoundingBox(
-          north = center.latitude + (0.5 + y) * length,
-          south = center.latitude + (-0.5 + y) * length,
-          west = center.longitude + (-0.5 + x) * length,
-          east = center.longitude + (0.5 + x) * length
-        )
+      .map {
+        case (x, y) =>
+          BoundingBox(
+            north = center.latitude + (0.5 + y) * length,
+            south = center.latitude + (-0.5 + y) * length,
+            west = center.longitude + (-0.5 + x) * length,
+            east = center.longitude + (0.5 + x) * length)
       }
       .map { bbox =>
         println(bbox)
         bbox
       }
       .flatMapConcat(streamNodes)
-      //.flatMapMerge(4, streamNodes)
+    //.flatMapMerge(4, streamNodes)
   }
 
   private def request(): RequestT[Empty, String, Nothing] = {

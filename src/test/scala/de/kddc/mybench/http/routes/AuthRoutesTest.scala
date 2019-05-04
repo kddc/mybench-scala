@@ -5,14 +5,15 @@ import java.util.UUID
 import akka.http.scaladsl.model.{FormData, StatusCodes}
 import akka.http.scaladsl.server.{AuthenticationFailedRejection, Route}
 import de.kddc.mybench.http.HttpProtocol
+import de.kddc.mybench.providers.AuthProvider._
 import de.kddc.mybench.{ServiceComponents, ServiceTest}
 import play.api.libs.json._
 
 class AuthRoutesTest extends ServiceTest with ServiceComponents with HttpProtocol {
   val routes = httpServer.routes
-  final case class RegisterData(username: String, password: String)
+  case class RegisterData(username: String, password: String)
   implicit val RegisterDataJsonFormat = Json.format[RegisterData]
-  implicit val AuthTokenResponseJsonFormat = Json.format[AuthTokenResponse]
+//  implicit val AuthTokenResponseJsonFormat = Json.format[AuthTokenResponse]
 
   "should register and authenticate users" in {
     val email = s"user-${UUID.randomUUID}"

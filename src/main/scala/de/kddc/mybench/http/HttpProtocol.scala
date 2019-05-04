@@ -6,7 +6,7 @@ import de.kddc.mybench.repositories.UserRepository.User
 import play.api.libs.json.{Json, Writes}
 
 trait HttpProtocol extends PlayJsonSupport {
-  final case class ImportResult(count: Long)
+  case class ImportResult(count: Long)
 
   implicit val UserJsonReads = Json.using[Json.WithDefaultValues].reads[User]
   implicit val UserJsonWrites: Writes[User] = Writes { user => Json.obj(

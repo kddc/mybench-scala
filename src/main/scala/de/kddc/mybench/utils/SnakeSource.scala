@@ -6,12 +6,12 @@ import akka.stream.scaladsl.Source
 object SnakeSource {
   def apply(): Source[(Long, Long), NotUsed] = {
     Source.unfold(0)(n => Some((n + 1, coordinates(n)))).map { case (x, y, _) => (x, y) }
-//    Source.unfold(0)({
-//      case n if n < 9 => Some(n + 1, coordinates(n))
-//      case _ => None
-//    }).map {
-//      case (x, y, _) => (x, y)
-//    }
+    //    Source.unfold(0)({
+    //      case n if n < 9 => Some(n + 1, coordinates(n))
+    //      case _ => None
+    //    }).map {
+    //      case (x, y, _) => (x, y)
+    //    }
   }
 
   private def coordinates(n: Long): (Long, Long, Long) = {

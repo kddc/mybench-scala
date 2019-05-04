@@ -1,6 +1,6 @@
 package de.kddc.mybench.http
 
-import akka.http.scaladsl.server.{Directive1, MalformedQueryParamRejection, Route}
+import akka.http.scaladsl.server.{ Directive1, MalformedQueryParamRejection, Route }
 import akka.http.scaladsl.server.Directives._
 import de.kddc.mybench.providers.AuthProvider
 import de.kddc.mybench.repositories.UserRepository.User

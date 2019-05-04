@@ -36,3 +36,4 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions += ""
+//scalacOptions := Seq("-unchecked")

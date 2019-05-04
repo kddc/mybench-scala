@@ -2,35 +2,40 @@ package de.kddc.mybench.providers
 
 import java.util.UUID
 
-import akka.http.scaladsl.model.headers.{HttpChallenge, OAuth2BearerToken}
-import akka.http.scaladsl.server.AuthenticationFailedRejection.{CredentialsMissing, CredentialsRejected}
-import akka.http.scaladsl.server.{AuthenticationFailedRejection, Directive1}
+import akka.http.scaladsl.model.headers.{ HttpChallenge, OAuth2BearerToken }
+import akka.http.scaladsl.server.AuthenticationFailedRejection.{ CredentialsMissing, CredentialsRejected }
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{ AuthenticationFailedRejection, Directive1 }
+import com.github.t3hnar.bcrypt._
+import play.api.libs.json.OFormat
+//import de.kddc.mybench.http.routes.{AuthFailure, AuthTokenResponse}
 import de.kddc.mybench.repositories.UserRepository
 import de.kddc.mybench.repositories.UserRepository.User
-import akka.http.scaladsl.server.Directives.AuthenticationResult
-import akka.http.scaladsl.server.directives.AuthenticationResult
-import com.github.t3hnar.bcrypt._
-import de.kddc.mybench.http.routes.AuthFailure
 import de.kddc.mybench.utils.JsonWebToken
 import play.api.libs.json.Json
+import com.typesafe.config.Config
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.concurrent.duration._
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Success
 
-//final case class UserPrincipal(userId: String)
-//final case class Claims()
-
-//final case class AuthFailure(error: String, description: String)
-
-
-class AuthProvider(userRepository: UserRepository)(implicit ex: ExecutionContext) {
+object AuthProvider {
+  final case class AuthTokenResponse(
+    access_token: String,
+    refresh_token: String,
+    token_type: String,
+    expires_in: Long)
+  final case class AuthFailure(
+    error: String,
+    description: String)
+  implicit val AuthTokenResponseJsonFormat: OFormat[AuthTokenResponse] = Json.format[AuthTokenResponse]
   type AuthResult[P] = Either[AuthFailure, P]
   val InvalidCredentials = AuthFailure("invalid_credentials", "Invalid Credentials")
   val InvalidToken = AuthFailure("invalid_token", "Could not find user provided in the token")
+}
 
-//  def extractPrincipal
-
+class AuthProvider(userRepository: UserRepository)(implicit ex: ExecutionContext, config: Config) {
+  import AuthProvider._
 
   def extractToken: Directive1[Option[String]] = {
     extractCredentials.flatMap {
@@ -86,5 +91,17 @@ class AuthProvider(userRepository: UserRepository)(implicit ex: ExecutionContext
       case Left(failure) =>
         Future.successful(Left(AuthFailure(failure.error, failure.description)))
     }
+  }
+
+  def createAuthTokenResponse(user: User): AuthTokenResponse = {
+    val accessTokenLifeTime = 300.seconds
+    val refreshTokenLifeTime = 30.days
+    val accessToken = JsonWebToken.createToken(user, JsonWebToken.AccessToken, accessTokenLifeTime)
+    val refreshToken = JsonWebToken.createToken(user, JsonWebToken.RefreshToken, refreshTokenLifeTime)
+    AuthTokenResponse(accessToken, refreshToken, "Bearer", accessTokenLifeTime.toSeconds - 1)
+  }
+
+  def createAuthTokenRejection(failure: AuthFailure): AuthenticationFailedRejection = {
+    AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("Bearer", JsonWebToken.realm, Map("error" -> failure.error, "error_description" -> failure.description)))
   }
 }
