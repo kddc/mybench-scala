@@ -45,5 +45,5 @@ packageName       in Docker := "mybench"
 version           in Docker := "server-latest"
 
 dockerRepository := Some("kddc")
-mainClass in Compile := Some("de.kddc.Application")
+mainClass in Compile := Some("de.kddc.mybench.Application")
 dockerBaseImage := "openjdk:jre"
