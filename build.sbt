@@ -38,6 +38,7 @@ libraryDependencies ++= Seq(
 scalacOptions += ""
 //scalacOptions := Seq("-unchecked")
 
+enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
 
 packageName       in Docker := "mybench"

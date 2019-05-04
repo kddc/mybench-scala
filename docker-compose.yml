@@ -10,13 +10,13 @@ services:
       - "CERTBOT_DOMAIN=mybench.xyz"
       - "CERTBOT_EMAIL=mail@jtiemann.de"
     volumes:
-      - "./nginx.conf:/etc/nginx/conf.d/athleets.conf:ro"
+      - "./nginx.conf:/etc/nginx/conf.d/mybench.conf:ro"
       - "letsencrypt:/etc/letsencrypt"
     depends_on:
       - "server1"
 
   server1:
-    image: "kddc/athleets:server-latest"
+    image: "kddc/mybench:server-latest"
     ports:
       - "8080:8080"
     environment:
