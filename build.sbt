@@ -37,3 +37,12 @@ libraryDependencies ++= Seq(
 
 scalacOptions += ""
 //scalacOptions := Seq("-unchecked")
+
+enablePlugins(DockerPlugin)
+
+packageName       in Docker := "mybench"
+version           in Docker := "server-latest"
+
+dockerRepository := Some("kddc")
+mainClass in Compile := Some("de.kddc.Application")
+dockerBaseImage := "openjdk:jre"
